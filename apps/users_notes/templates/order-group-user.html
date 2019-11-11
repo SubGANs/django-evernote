@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="ui stackable grid">
+  <dir class="four wide column"></dir>
+  
+  <div class="eight wide column">
+    <div class="ui stacked segment">
+      <form class="ui form" method="POST" action="{% url 'user_order_group' %}">
+        {% csrf_token %}
+        <h4 class="ui dividing header">Порядок групп в меню</h4>
+        {% for group in groups %}
+          <div class="inline fields">
+            <div class="six wide field">
+              <input type="text" readonly="" value="{{ group }}">
+            </div>
+            <div class="ten wide field">
+              <input type="number" name="{{ group.id }}" value="{{ group.order }}" placeholder="Номер группы">
+            </div>
+          </div>
+        {% endfor %}
+        <p>
+          <input class="ui black button" type="button" value="Назад" onClick="history.back();">
+          <button class="ui green ok right labeled icon button" type="submit">Сохранить<i class="checkmark icon"></i></button>
+        </p>
+      </form>
+    </div>
+  </div>
+  
+  <dir class="four wide column"></dir>
+
+</div>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load martortags %}
+{% load my_tags %}
+
+{% block title %}Неопубликованные - {% endblock %}
+
+{% block content %}
+<div class="ui stackable grid">
+  <div class="wide column">
+    {% if notes %}
+      {% for note in notes %}
+        <div class="ui stacked segment martor-preview">
+          <span class="ui medium green header">[{{ note.group }}] {{ note.head }}</span>
+          <div class="ui clearing divider"></div>
+          <p>
+            {% for tags in note.tags_choices.all %}
+              <span id="tag" class="ui tag tiny label">{{ tags }}</span>
+            {% endfor %}
+          </p>
+          <p>{{ note.body|safe_markdown }}</p>
+          <div class="ui fitted divider"></div>
+          <div class="ui items">
+            <div class="item">
+              <div class="middle aligned content">
+                <div class="decription">
+                  Автор: {{ note.user.last_name }} {{ note.user.first_name }} Дата: {{ note.created }} 
+                  {% if note.name_modifed %}
+                    Изменено: {{ note.modifed }} ({{  note.name_modifed }})
+                  {% endif %}
+                  <a id="note-delete" value-id="{{ note.id }}" value-head="{{ note.head }}"><i class="large red right floated trash alternate icon" title="Удалить заметку"></i></a>
+                  <a href="{% url 'note_edit' note.id %}"><i class="large green right floated edit outline icon" title="Редактировать заметку"></i></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="ui stacked segment">
+        <h2 class="ui green header">Ты ничего не написал :,-(</h2>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+
+<div id="ModalNoteDelete" class="ui small modal">
+  <i class="close icon"></i>
+  {% include "modal-note-delete.html" %}
+</div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+{# Модаль удаления заметки #}
+$('.segment #note-delete').click(function(event){
+  event.preventDefault();
+  var id_note = $(this).attr("value-id");
+  var head_note = $(this).attr("value-head");
+  $("#note-delete-header").text(head_note);
+  $('#ModalNoteDelete').modal({
+    onApprove: function() {
+      $.ajax({
+        type: "GET",
+        url: "{% url 'note_delete' 0 %}".replace(/0/, id_note.toString()),
+        success: function(data) {
+          location.reload();
+        },
+        error: function(data) {
+          location.reload();
+        },
+      })
+    }
+  }).modal('show');
+});
+
+{# Модаль удаления пользовательской заметки #}
+$('.segment #user-note-delete').click(function(event){
+  event.preventDefault();
+  var id_note = $(this).attr("value-id");
+  var head_note = $(this).attr("value-head");
+  $("#note-delete-header").text(head_note);
+  $('#ModalNoteDelete').modal({
+    onApprove: function() {
+      $.ajax({
+        type: "GET",
+        url: "{% url 'user_note_delete' 0 %}".replace(/0/, id_note.toString()),
+        success: function(data) {
+          location.reload();
+        },
+        error: function(data) {
+          location.reload();
+        },
+      })
+    }
+  }).modal('show');
+});
+
+
+{# Поиск по тегу при двойном клике #}
+$("span#tag").dblclick(function(){
+  var tag = $.trim($(this).text());
+  document.location.href = "{% url 'search' %}?text=0&tags=on".replace(/0/, tag.toString());
+})
+</script>
+{% endblock %}

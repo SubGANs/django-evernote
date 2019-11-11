@@ -1,0 +1,36 @@
+# Settings for local server
+
+SECRET_KEY = ''
+
+DEBUG = True
+
+# Domain
+ALLOWED_HOSTS = ['127.0.0.1']
+
+
+# SMTP settings
+EMAIL_HOST = ''
+EMAIL_PORT = 25
+EMAIL_USE_TLS = True
+EMAIL_HOST_PASSWORD = ''
+
+SERVER_EMAIL = 'local@email.com'
+ADMINS = [('Admin', 'admin@email.com')]
+ACCOUNT_EMAIL_SUBJECT_PREFIX = EMAIL_SUBJECT_PREFIX = '[DJANGO] '
+EMAIL_HOST_USER = DEFAULT_FROM_EMAIL = 'admin@email.com'
+
+
+# Settings to connect DB
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': '',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'POST': '3306',
+        'OPTIONS': {
+                'sql_mode': 'traditional',
+        }
+    }
+}

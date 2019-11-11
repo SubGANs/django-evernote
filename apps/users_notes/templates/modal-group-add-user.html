@@ -1,0 +1,15 @@
+<div class="header">
+  Добавить свою группу
+</div>
+<div class="content">
+  <form id="group-add-form" method="POST" class="ui form" action="{% url 'user_group_add' %}">
+    {% csrf_token %}
+    <div class="field">
+      <input id="group-name" type="text" class="form-control" placeholder="Название группы" name="name" required>
+    </div>
+  </form>
+</div>
+<div class="actions">
+  <button class="ui primary ok right labeled icon button" type="submit">Добавить<i class="checkmark icon"></i></button>
+  <button class="ui black deny button" type="button" data-dismiss="modal">Закрыть</button>
+</div>

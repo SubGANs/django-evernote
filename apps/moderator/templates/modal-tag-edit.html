@@ -1,0 +1,18 @@
+<div class="header">
+  Изменить тег
+</div>
+<div class="content">
+  <form id="tag-edit-form" method="POST" class="ui form" action="{% url 'tag_edit' %}">
+    {% csrf_token %}
+    <div class="field">
+      <input id="tag-name-edit" type="text" placeholder="Название тега" name="name" required>
+    </div>
+    <div class="field">
+      <input id="tag-id-edit" type="hidden" name="id" value="asd" required>
+    </div>
+  </form>
+</div>
+<div class="actions">
+  <button class="ui primary ok right labeled icon button" type="submit">Изменить<i class="checkmark icon"></i></button>
+  <button class="ui black deny button" type="button" data-dismiss="modal">Закрыть</button>
+</div>

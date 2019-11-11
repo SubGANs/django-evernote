@@ -1,0 +1,311 @@
+{% load static %}
+{% load my_tags %}
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>{% block title %}{% endblock %}Заметки</title>
+  {# CSS файлы #}
+  <link rel="stylesheet" href="{% static 'css/ace.min.css' %}">
+  {% if request.COOKIES.black_scheme == "true" %}
+    <link rel="stylesheet" href="{% static 'css/semantic.darkly.min.css' %}">
+    <link rel="preload" href="{% static 'css/martor-preview-black.css' %}" as="style" onload="this.rel='stylesheet'">
+  {% else %}
+    <link rel="stylesheet" href="{% static 'css/semantic.min.css' %}">
+    <link rel="preload" href="{% static 'css/martor-preview.css' %}" as="style" onload="this.rel='stylesheet'">
+  {% endif %}
+  <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+  <style type="text/css">
+    .main.container {
+      padding-top: 60px;
+    }
+    #topButton {
+      display: none;
+      position: fixed;
+      bottom: 10px;
+      right: 30px;
+      z-index: 99;
+      font-size: 12px;
+      border: none;
+      outline: none;
+      background-color: #20B2AA;
+      color: white;
+      cursor: pointer;
+      padding: 15px;
+      border-radius: 4px;
+      opacity: .3;
+    }
+
+    #topButton:hover {
+      background-color: #228B22;
+    }
+  </style>
+  {% block css %}{% endblock %}
+  {{ form.media }}
+</head>
+
+<body>
+{# on top #}
+<button onclick="topFunction()" id="topButton"><i class="chevron up icon"></i></button>
+
+{% if user.is_authenticated %}
+  {# Вертикальное меню #}
+  <div class="ui red vertical sidebar menu">
+    <div class="ui container">
+      <a target="_blank" class="active item" href="http://google.com">
+        <i class="heart icon"></i>
+        Google
+      </a>
+      <a target="_blank" class="item" href="https://ya.ru">
+        <i class="tasks icon"></i>
+        Ya.Ru
+      </a>
+      <div class="item">
+        <b>Регламенты</b>
+        <div class="menu">
+          <a target="_blank" class="item" href="1">1</a>
+          <a target="_blank" class="item" href="2">2</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pusher">
+    {# Горизотальное меню #}
+    <div class="ui fixed borderless menu">
+      {#<div class="ui container">#}
+        <a class="item">
+          <div class="ui basic button">Всего заметок: <span id="count-notes"><i class="ui tiny active inline loader"></i></span></div>
+        </a>
+        <a class="active item" id="toggle-sidebar">
+          <i class="large linux icon" title="Клик!"></i>
+        </a>
+        <a class="item" href="{% url 'index' %}">
+          Все заметки
+        </a>
+        <div class="ui dropdown item">
+          Мои заметки
+          <i class="dropdown icon"></i>
+          <div class="menu">
+            <a class="item" href="{% url 'user_note' %}">Личные заметки</a>
+            <a class="item" href="{% url 'user_published_notes' %}">Опубликованные</a>
+            <a class="item" href="{% url 'user_unpublished_notes' %}">Ожидают публикации</a>
+          </div>
+        </div>
+        <a class="item" href="{% url 'note_new' %}">
+          Новые
+        </a>
+        <div class="right menu">
+          <a class="item" id="feedback">
+            Пожелания
+          </a>
+          {% if request.user|in_group:"Moderators" %} 
+            <div class="ui pointing dropdown item">
+              Управление<i class="dropdown icon"></i>
+              <div class="ui vertical menu">
+                <a class="item" href="/notesadmin">Админка</a>
+                <a class="item" href="{% url 'control_notes' %}">
+                  Заметки на публикацию
+                  <span class="ui label" id="on-public-notes"></span>
+                </a>
+                <a class="item" href="{% url 'order_group' %}">Порядок групп</a>
+                <a class="item" href="{% url 'control_tags' %}">Теги</a>
+              </div>
+            </div>
+          {% endif %}
+          <form class="item" accept-charset="utf-8" method="POST" action="{% url 'search' %}">
+            {% csrf_token %}
+            <div class="ui icon input">
+              <input type="text" name="text" id="global-search" placeholder="Поиск... (Ctrl + Shift + F)">
+              <i class="search link icon"></i>
+            </div>
+          </form>
+          <div class="ui dropdown item">
+            {{ user.last_name }} {{ user.first_name }} <i class="dropdown icon"></i>
+            <div class="menu">
+              <a class="item" href="/accounts/password/change">Изменить пароль</a>
+              {% if request.COOKIES.black_scheme == "true" %}
+                <a class="item" id="black-scheme" href="">Светлая тема</a>
+              {% else %}
+                <a class="item" id="black-scheme" href="">Темная тема</a>
+              {% endif %}
+              <a class="item" href="/accounts/logout">Выход</a>
+            </div>
+          </div>
+        </div>
+      {#</div>#}
+    </div>
+
+    {# grid под контент #}
+    <div class="ui fluid main container">
+      <p></p>
+      <div class="ui stackable grid">
+        <div class="one wide column">
+          {# Пустое поле #}
+        </div>
+      
+        <div class="fourteen wide column">
+          {% if messages %}
+            {% for message in messages %}
+              <div class="ui {{ message.tags }} message">
+                <i class="close icon"></i>
+                <p>{{ message }}</p>
+              </div>
+            {% endfor %}
+          {% endif %}
+          {% block content %}{% endblock %}
+        </div>
+
+        <div class="one wide column">
+          {# Пустое поле #}
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+{# Модаль фидбека #}
+<div id="ModalFeedback" class="ui small modal">
+  <i class="close icon"></i>
+  <div class="header">
+    Баги, фичи, пожелания и т.д.
+  </div>
+  <div class="content">
+    <form id="feedback-form" method="POST" class="ui form" action="{% url 'feedback' %}">
+      {% csrf_token %}
+      <div class="field">
+        <textarea id="feedback-text" name="text" rows="3"></textarea>
+      </div>
+    </form>
+  </div>
+  <div class="actions">
+    <button class="ui primary ok right labeled icon button" type="submit">Отправить<i class="checkmark icon"></i></button>
+    <button class="ui black deny button" type="button" data-dismiss="modal">Закрыть</button>
+  </div>
+</div>
+
+
+{# JS файлы #}
+<script src="{% static 'js/jquery-3.2.1.min.js' %}"></script>
+<script src="{% static 'js/jquery.cookie.js' %}"></script>
+<script src="{% static 'js/semantic.min.js' %}"></script>
+<script src="{% static 'js/highlight.min.js' %}"></script>
+<script src="{% static 'js/clipboard.min.js' %}"></script>
+<script src="{% static 'js/clipboard.min.js' %}"></script>
+<script src="{% static 'js/hotkeys.min.js' %}"></script>
+
+{% block js %}{% endblock %}
+
+<script type="text/javascript">
+{# Подсветка синтаксиса #}
+$('pre').each(function(i, block){
+  hljs.highlightBlock(block);
+});
+
+{# Левое меню #}
+$('#toggle-sidebar').on('click', function () {
+  $('.sidebar').sidebar('toggle')
+});
+
+{# Автоскрытие сообщений #}
+window.setTimeout(function() {
+    $(".message").fadeTo(500, 0).slideUp(500, function(){
+        $(this).remove(); 
+    });
+}, 3000);
+
+$('.message .close')
+  .on('click', function() {
+    $(this)
+      .closest('.message')
+      .transition('fade')
+    ;
+});
+
+{# Вызов выпадающих меню #}
+$('.ui.dropdown').dropdown();
+
+{# Отправка фидбека в телегу #}
+$("#feedback").on('click', function(){
+  $("#ModalFeedback").modal('show');
+});
+
+$('#ModalFeedback').modal({
+  onApprove: function() {
+    $.ajax({
+      type: "POST",
+      url: "{% url 'feedback' %}",
+      headers: {'X-CSRFToken': '{{ csrf_token }}'},
+      data: $('#feedback-form').serialize(),
+      dataType: "json",
+      cache: false,
+      success: function(data) {
+        $('#feedback-text').val('');
+        location.reload();
+      },
+      error: function(data) {
+        $('#feedback-text').val('');
+        location.reload();
+      },
+  })
+}
+});
+
+{# Счетчик заметок #}
+$( document ).ready(function() {
+  $.ajax({
+    type: "GET",
+    url: "{% url 'count_notes' %}",
+    dataType: "json",
+    cache: false,
+    success: function(data) {
+      $("#count-notes").text(data.count);
+      $("#on-public-notes").text(data.on_public);
+    },
+    error: function(data) {
+      $("#count-notes").text(data.count);
+      $("#on-public-notes").text(data.on_public);
+    },
+  })
+});
+
+{# on top #}
+window.onscroll = function() {scrollFunction()};
+
+function scrollFunction() {
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+        document.getElementById("topButton").style.display = "block";
+    } else {
+        document.getElementById("topButton").style.display = "none";
+    }
+}
+
+// When the user clicks on the button, scroll to the top of the document
+function topFunction() {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+}
+
+{# Focus search #}
+$(document).bind('keydown', 'ctrl+shift+f', function(){$('#global-search')[0].focus();});
+
+$("#black-scheme").on('click', function(){
+  var black_scheme = $.cookie("black_scheme");
+  if (black_scheme == "true"){
+    $.cookie("black_scheme", "false", {path: "/"});
+    location.reload();
+  }
+  else {
+    $.cookie("black_scheme", "true", {path: "/"});
+    location.reload();
+  }
+});
+
+</script>
+{% endif %}
+</body>
+
+</html>

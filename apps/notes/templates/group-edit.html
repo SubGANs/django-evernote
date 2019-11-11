@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form class="ui form" method="POST">
+  <h4 class="ui dividing header">Редактирование группы</h4>
+        {% csrf_token %}
+        {{ form.as_p }}
+  <p>
+    <input class="ui black button" type="button" value="Назад" onClick="history.back();">
+    <button class="ui green ok right labeled icon button" type="submit">Сохранить<i class="checkmark icon"></i></button>
+  </p>
+</form>
+{% endblock %}

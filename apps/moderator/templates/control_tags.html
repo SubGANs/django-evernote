@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Теги - {% endblock %}
+
+{% block content %}
+<div class="ui stackable grid">
+  <dir class="four wide column"></dir>
+  
+  <div class="eight wide column">
+    <div class="ui stacked segment">
+      <button class="ui right green basic button" id="tag-add">Добавить тег</button>
+      <div class="ui segments">
+        {% for tag in tags %}
+          <div class="ui segment">
+              <p>
+                <div class="ui form">
+                  <div class="fields">
+                    <div class="twelve wide field">
+                      <input type="text" readonly="" value="{{ tag }}">
+                    </div>
+                    <duv class="field">
+                      <button class="ui green basic button" id="tag-edit" tag-id="{{ tag.id }}" tag-name="{{ tag }}">Изменить</button>
+                    </duv>
+                    <div class="field">
+                      <button class="ui red basic button" id="tag-delete" tag-id="{{ tag.id }}" tag-name="{{ tag }}">Удалить</button>
+                    </div>
+                  </div>
+                </div>
+              </p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  
+  <dir class="four wide column"></dir>
+
+{# Модаль добавления тега #}
+<div id="ModalTagAdd" class="ui small modal">
+  <i class="close icon"></i>
+  {% include "modal-tag-add.html" %}
+</div>
+
+{# Модаль удаления тега #}
+<div id="ModalTagDelete" class="ui small modal">
+  <i class="close icon"></i>
+  {% include "modal-tag-delete.html" %}
+</div>
+
+{# Модаль изменения тега #}
+<div id="ModalTagEdit" class="ui small modal">
+  <i class="close icon"></i>
+  {% include "modal-tag-edit.html" %}
+</div>
+
+</div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+{# Модаль добавления группы #}
+$("#tag-add").on('click', function(){
+  $("#ModalTagAdd").modal('show');
+});
+
+$('#ModalTagAdd').modal({
+  onApprove: function() {
+    $.ajax({
+      type: "POST",
+      url: "{% url 'tag_add' %}",
+      headers: {'X-CSRFToken': '{{ csrf_token }}'},
+      data: $('#tag-add-form').serialize(),
+      dataType: "json",
+      cache: false,
+      success: function(data) {
+        $('#tag-name').val('');
+        location.reload();
+      },
+      error: function(data) {
+        $('#tag-name').val('');
+        location.reload();
+      },
+  })
+}
+});
+
+{# Удаление тега #}
+$('.form #tag-delete').click(function() {
+  var id_tag = $(this).attr("tag-id");
+  var tag_name = $(this).attr("tag-name");
+  $("#tag-name-delete").text(tag_name);
+  $('#ModalTagDelete').modal({
+    onApprove: function() {
+      $.ajax({
+        type: "GET",
+        url: "{% url 'tag_delete' 0 %}".replace(/0/, id_tag.toString()),
+        success: function(data) {
+          location.reload();
+        },
+        error: function(data) {
+          location.reload();
+        },
+      })
+    }
+  }).modal('show');
+});
+
+{# Изменение тега #}
+$('.form #tag-edit').click(function() {
+  var id_tag = $(this).attr("tag-id");
+  var tag_name = $(this).attr("tag-name");
+  $("input#tag-name-edit").val(tag_name);
+  $("input#tag-id-edit").val(id_tag);
+  $('#ModalTagEdit').modal({
+    onApprove: function() {
+      $.ajax({
+        type: "POST",
+        url: "{% url 'tag_edit' %}",
+        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+        data: $('#tag-edit-form').serialize(),
+        dataType: "json",
+        cache: false,
+        success: function(data) {
+          location.reload();
+        },
+        error: function(data) {
+          location.reload();
+        },
+      })
+    }
+  }).modal('show');
+});
+</script>
+{% endblock %}

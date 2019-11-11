@@ -1,0 +1,9 @@
+[Unit]
+Description=uWSGI instance to server notes
+
+[Service]
+ExecStartPre=-/usr/bin/bash -c 'mkdir -p /run/uwsgi; chown apache:nginx /run/uwsgi'
+ExecStart=/usr/bin/bash -c 'cd /var/www/html; source venv/bin/activate; uwsgi --ini uwsgi.ini'
+
+[Install]
+WantedBy=multi-user.target

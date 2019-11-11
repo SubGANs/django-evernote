@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block content %}
+<form class="ui form" method="POST">
+  <h4 class="ui dividing header">Создание личной заметки</h4>
+    {% csrf_token %}
+    <div class="field">
+      <label>Группа</label>
+      {{ form.group|add_class:"ui fluid search selection dropdown" }}
+    </div>
+    <div class="field">
+      <label>Заголовок</label>
+      {{ form.head }}
+    </div>
+    {{ form.body }}
+    <div class="field">
+      <label>Теги</label>
+      {{ form.tags }}
+    </div>
+  <p>
+    <input class="ui black button" type="button" value="Назад" onClick="history.back();">
+    <button class="ui green ok right labeled icon button" type="submit">Сохранить<i class="checkmark icon"></i></button>
+  </p>
+</form>
+{% endblock %}

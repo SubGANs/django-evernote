@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="col-sm-6 col-sm-offset-3">
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <p>Вы уверены, что хотите выйти?</p>
+  </div>
+
+<div class="panel-body">
+<form method="post" action="{% url 'account_logout' %}">
+  {% csrf_token %}
+    <button type="submit" class="btn btn btn-primary">Выйти</button>
+</form>
+</div>
+</div>
+</div>
+{% endblock %}

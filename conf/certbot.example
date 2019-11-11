@@ -1,0 +1,7 @@
+certbot register -m admin@example.com
+
+Dry run:
+certbot certonly --expand -d example.com -d www.example.com -w /var/www/example.com --webroot -n --dry-run
+
+crontab:
+@daily /usr/bin/certbot --nginx renew -q

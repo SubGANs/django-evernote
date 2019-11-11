@@ -1,0 +1,79 @@
+{% load static %}
+{% load martortags %}
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Заметкa</title>
+  <link rel="stylesheet" href="{% static 'css/ace.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/semantic.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/martor-preview.css' %}">
+  <style type="text/css">
+    .main.container {
+      padding-top: 60px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="ui fluid main container">
+      <p></p>
+      <div class="ui grid">
+        <div class="one wide column">
+          {# Пустое поле #}
+        </div>
+
+      <div class="fourteen wide column">
+
+        <div class="ui stacked segment martor-preview">
+          <span class="ui medium green header">{{ note.head }}</span>
+          <div class="ui clearing divider"></div>
+          <p>{{ note.body|safe_markdown }}</p>
+          <div class="ui fitted divider"></div>
+          <div class="ui items">
+            <div class="item">
+              <div class="middle aligned content">
+                <div class="decription">
+                  Автор: {{ note.user.last_name }} {{ note.user.first_name }} Дата: {{ note.created }} 
+                  {% if note.name_modifed %}
+                    Изменено: {{ note.modifed }} ({{  note.name_modifed }})
+                  {% endif %}
+                  {% if user.is_authenticated and user.id != note.user.id %}
+                    <form method="POST" action="{% url 'user_note_add' 0 %}" style="display:inline;">
+                      {% csrf_token %}
+                      <input type="hidden" name="body" value="{{ note.body }}">
+                      <input type="hidden" name="head" value="{{ note.head }}">
+                      <button class="ui right floated basic button" type="submit">Сохранить в личные заметки</button>
+                    </form>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+    </div>
+
+    <div class="one wide column">
+      {# Пустое поле #}
+    </div>
+  </div>
+</div>
+
+
+<script src="{% static 'js/jquery-3.2.1.min.js' %}"></script>
+<script src="{% static 'js/semantic.min.js' %}"></script>
+<script src="{% static 'js/highlight.min.js' %}"></script>
+<script type="text/javascript">
+$('pre').each(function(i, block){
+  hljs.highlightBlock(block);
+});
+</script>
+
+</body>
+
+</html>
